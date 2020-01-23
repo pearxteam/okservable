@@ -7,7 +7,7 @@
 
 package net.pearx.okservable.test
 
-import net.pearx.okservable.collection.observableSetSimpleBy
+import net.pearx.okservable.collection.observable
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,7 +15,7 @@ import kotlin.test.assertTrue
 class ObservableSetSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
-        var collection = observableSetSimpleBy(if(empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")) { modified = true }
+        var collection = (if(empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")).observable { modified = true }
     }
 
     @Test

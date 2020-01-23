@@ -8,3 +8,14 @@
 package net.pearx.okservable.internal
 
 internal inline fun Boolean.ifTrue(block: () -> Unit): Boolean = also { if (it) block() }
+
+internal fun <C : MutableCollection<E>, E> C.removeBulk(elements: Collection<E>, remove: Boolean): Boolean {
+        val it = iterator()
+        var modified = false
+        for (el in it)
+            if (el in elements == remove) {
+                it.remove()
+                modified = true
+            }
+        return modified
+}

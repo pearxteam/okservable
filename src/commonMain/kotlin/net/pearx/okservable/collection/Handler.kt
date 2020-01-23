@@ -7,14 +7,10 @@
 
 package net.pearx.okservable.collection
 
-//region Simple
 typealias ObservableCollectionHandlerSimple = () -> Unit
-
 typealias ObservableListHandlerSimple = () -> Unit
-//endregion
 
 
-//region Standard
 interface AbstractObservableCollectionHandler<T> {
     fun onClear(elements: Collection<T>)
 }
@@ -29,10 +25,8 @@ interface ObservableListHandler<T> : AbstractObservableCollectionHandler<T> {
     fun onRemove(index: Int, element: T)
     fun onSet(index: Int, prevValue: T, newValue: T)
 }
-//endregion
 
 
-//region Abstract Builder
 private typealias ClearBlock<T> = (elements: Collection<T>) -> Unit
 
 abstract class AbstractObservableCollectionHandlerScope<T> {
@@ -48,9 +42,7 @@ abstract class AbstractObservableCollectionHandlerScope<T> {
         }
     }
 }
-//endregion
 
-//region Collection Builder
 private typealias CollectionElementBlock<T> = (element: T) -> Unit
 
 class ObservableCollectionHandlerScope<T> : AbstractObservableCollectionHandlerScope<T>() {
@@ -78,10 +70,8 @@ class ObservableCollectionHandlerScope<T> : AbstractObservableCollectionHandlerS
     @PublishedApi
     internal fun createHandler(): ObservableCollectionHandler<T> = Handler()
 }
-//endregion
 
 
-//region List Builder
 private typealias ListElementBlock<T> = (index: Int, element: T) -> Unit
 private typealias ListSetBlock<T> = (index: Int, prevElement: T, newElement: T) -> Unit
 
@@ -120,4 +110,3 @@ class ObservableListHandlerScope<T> : AbstractObservableCollectionHandlerScope<T
     @PublishedApi
     internal fun createHandler(): ObservableListHandler<T> = Handler()
 }
-//endregion
