@@ -5,8 +5,6 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-@file:Suppress("NOTHING_TO_INLINE")
-
 package net.pearx.okservable.collection
 
 interface IObservableSet<C : MutableSet<E>, E> : IObservableCollection<C, E>, MutableSet<E> {
