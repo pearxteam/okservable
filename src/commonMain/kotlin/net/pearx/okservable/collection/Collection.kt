@@ -58,9 +58,11 @@ open class ObservableCollectionSimpleRA<C : MutableCollection<E>, E>(base: C, on
 
 abstract class AbstractObservableCollection<C : MutableCollection<E>, E, U : AbstractObservableCollectionHandler<E>>(override val base: C, protected val onUpdate: U) : IObservableCollection<C, E> {
     override fun clear() {
-        val lst = ArrayList(this)
-        base.clear()
-        onUpdate.onClear(lst)
+        if(size > 0) {
+            val lst = ArrayList(this)
+            base.clear()
+            onUpdate.onClear(lst)
+        }
     }
 
     override fun equals(other: Any?): Boolean = base == other

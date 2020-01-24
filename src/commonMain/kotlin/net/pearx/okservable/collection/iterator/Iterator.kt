@@ -5,6 +5,8 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+@file:Suppress("UNCHECKED_CAST")
+
 package net.pearx.okservable.collection.iterator
 
 import net.pearx.okservable.collection.ObservableCollectionHandler
@@ -24,6 +26,6 @@ class ObservableMutableIterator<T>(private val base: MutableIterator<T>, private
 
     override fun remove() {
         base.remove()
-        onUpdate.onRemove(lastElement!!)
+        onUpdate.onRemove(lastElement as T)
     }
 }
