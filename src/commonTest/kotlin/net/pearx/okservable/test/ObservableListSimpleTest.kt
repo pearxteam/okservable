@@ -10,12 +10,11 @@ package net.pearx.okservable.test
 import net.pearx.okservable.collection.observableSimple
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
-class ObservableSetSimpleTest {
+class ObservableListSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
-        var collection = (if(empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")).observableSimple { modified = true }
+        var collection = (if(empty) mutableListOf() else mutableListOf("theevilroot", "root", null, "")).observableSimple { modified = true }
     }
 
     @Test
@@ -35,8 +34,8 @@ class ObservableSetSimpleTest {
                 assertEquals(false, isEmpty())
 
                 assertEquals("[theevilroot, root, null, ]", toString())
-                assertEquals(setOf("theevilroot", "root", null, "").hashCode(), hashCode())
-                assertTrue(this == setOf("theevilroot", "root", null, ""))
+                assertEquals(listOf("theevilroot", "root", null, "").hashCode(), hashCode())
+                assertEquals(this, listOf("theevilroot", "root", null, ""))
             }
             assertEquals(false, modified)
         }
@@ -52,8 +51,8 @@ class ObservableSetSimpleTest {
                 assertEquals(true, isEmpty())
 
                 assertEquals("[]", toString())
-                assertEquals(setOf<String?>().hashCode(), hashCode())
-                assertEquals<Collection<String?>>(this, setOf())
+                assertEquals(listOf<String?>().hashCode(), hashCode())
+                assertEquals(this, listOf<String?>())
             }
             assertEquals(false, modified)
         }
@@ -63,14 +62,14 @@ class ObservableSetSimpleTest {
     fun testAdd() {
         with(TestingContext()) {
             collection.add("theevilroot")
-            assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(true, modified)
+            assertEquals(listOf<String?>("theevilroot", "root", null, "", "theevilroot"), collection.base)
         }
 
         with(TestingContext()) {
             collection.add("theevilroot1")
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, "", "theevilroot1"), collection.base)
         }
     }
 
@@ -78,26 +77,26 @@ class ObservableSetSimpleTest {
     fun testAddAll() {
         with(TestingContext()) {
             collection.addAll(listOf(null, "root"))
-            assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(true, modified)
+            assertEquals(listOf<String?>("theevilroot", "root", null, "", null, "root"), collection.base)
         }
 
         with(TestingContext()) {
             collection.addAll(listOf("theevilroot", "theevilroot1"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, "", "theevilroot", "theevilroot1"), collection.base)
         }
 
         with(TestingContext()) {
             collection.addAll(listOf("openwrt", "ddwrt"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "openwrt", "ddwrt"), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, "", "openwrt", "ddwrt"), collection.base)
         }
 
         with(TestingContext()) {
             collection.addAll(listOf())
             assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, ""), collection.base)
         }
     }
 
@@ -106,13 +105,13 @@ class ObservableSetSimpleTest {
         with(TestingContext(true)) {
             collection.clear()
             assertEquals(false, modified)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(listOf<String?>(), collection.base)
         }
 
         with(TestingContext()) {
             collection.clear()
             assertEquals(true, modified)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(listOf<String?>(), collection.base)
         }
     }
 
@@ -126,7 +125,7 @@ class ObservableSetSimpleTest {
             }
             assertEquals(4, num)
             assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, ""), collection.base)
         }
 
         with(TestingContext()) {
@@ -139,7 +138,7 @@ class ObservableSetSimpleTest {
             }
             assertEquals(4, num)
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", ""), collection.base)
         }
     }
 
@@ -148,13 +147,13 @@ class ObservableSetSimpleTest {
         with(TestingContext()) {
             collection.remove("theevilroot1")
             assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, ""), collection.base)
         }
 
         with(TestingContext()) {
             collection.remove("theevilroot")
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("root", null, ""), collection.base)
+            assertEquals(listOf<String?>("root", null, ""), collection.base)
         }
     }
 
@@ -163,19 +162,19 @@ class ObservableSetSimpleTest {
         with(TestingContext()) {
             collection.removeAll(listOf("openwrt", "ddwrt"))
             assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, ""), collection.base)
         }
 
         with(TestingContext()) {
             collection.removeAll(listOf(null, "root"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("theevilroot", ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", ""), collection.base)
         }
 
         with(TestingContext()) {
             collection.removeAll(listOf("theevilroot", "theevilroot1"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>("root", null, ""), collection.base)
+            assertEquals(listOf<String?>("root", null, ""), collection.base)
         }
     }
 
@@ -184,19 +183,19 @@ class ObservableSetSimpleTest {
         with(TestingContext()) {
             collection.retainAll(listOf("theevilroot", "root", null, ""))
             assertEquals(false, modified)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(listOf<String?>("theevilroot", "root", null, ""), collection.base)
         }
 
         with(TestingContext()) {
             collection.retainAll(listOf(null, "", "theevilroot1"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>(null, ""), collection.base)
+            assertEquals(listOf<String?>(null, ""), collection.base)
         }
 
         with(TestingContext()) {
             collection.retainAll(listOf("theevilroot1"))
             assertEquals(true, modified)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(listOf<String?>(), collection.base)
         }
     }
 }
