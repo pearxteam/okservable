@@ -42,6 +42,13 @@ class ObservableSetTest {
     }
 
     @Test
+    fun testRandomAccess() {
+        with(TestingContext()) {
+            assertEquals(false, collection is RandomAccess)
+        }
+    }
+
+    @Test
     fun testNotChangedMethodsNonEmpty() {
         with(TestingContext()) {
             with(collection) {

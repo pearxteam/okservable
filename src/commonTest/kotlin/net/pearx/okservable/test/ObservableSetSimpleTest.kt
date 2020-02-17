@@ -21,7 +21,7 @@ class ObservableSetSimpleTest {
     @Test
     fun testRandomAccess() {
         with(TestingContext()) {
-            assertEquals(true, collection is RandomAccess)
+            assertEquals(false, collection is RandomAccess)
         }
     }
 
