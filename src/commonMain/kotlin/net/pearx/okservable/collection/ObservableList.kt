@@ -87,6 +87,6 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : ObservableList<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableListHandlerSimple): IObservableList<C, E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
-fun <C : MutableList<E>, E> C.observableList(onUpdate: ObservableListHandler<E>): IObservableList<C, E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
-inline fun <C : MutableList<E>, E> C.observableList(crossinline block: ObservableListHandlerScope<E>.() -> Unit): IObservableList<C, E> = observableList(ObservableListHandlerScope<E>().also(block).createHandler())
+fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableListHandlerSimple): MutableList<E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
+fun <C : MutableList<E>, E> C.observableList(onUpdate: ObservableListHandler<E>): MutableList<E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
+inline fun <C : MutableList<E>, E> C.observableList(crossinline block: ObservableListHandlerScope<E>.() -> Unit): MutableList<E> = observableList(ObservableListHandlerScope<E>().also(block).createHandler())

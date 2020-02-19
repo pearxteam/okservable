@@ -27,6 +27,6 @@ open class ObservableSet<C : MutableSet<E>, E>(base: C, onUpdate: ObservableColl
 open class ObservableSetRA<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableSet<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableSet<E>, E> C.observableSetSimple(onUpdate: ObservableCollectionHandlerSimple): IObservableSet<C, E> = if (this is RandomAccess) ObservableSetSimpleRA(this, onUpdate) else ObservableSetSimple(this, onUpdate)
-fun <C : MutableSet<E>, E> C.observableSet(onUpdate: ObservableCollectionHandler<E>): IObservableSet<C, E> = if (this is RandomAccess) ObservableSetRA(this, onUpdate) else ObservableSet(this, onUpdate)
-inline fun <C : MutableSet<E>, E> C.observableSet(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): IObservableCollection<C, E> = observableSet(ObservableCollectionHandlerScope<E>().also(block).createHandler())
+fun <C : MutableSet<E>, E> C.observableSetSimple(onUpdate: ObservableCollectionHandlerSimple): MutableSet<E> = if (this is RandomAccess) ObservableSetSimpleRA(this, onUpdate) else ObservableSetSimple(this, onUpdate)
+fun <C : MutableSet<E>, E> C.observableSet(onUpdate: ObservableCollectionHandler<E>): MutableSet<E> = if (this is RandomAccess) ObservableSetRA(this, onUpdate) else ObservableSet(this, onUpdate)
+inline fun <C : MutableSet<E>, E> C.observableSet(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): MutableSet<E> = observableSet(ObservableCollectionHandlerScope<E>().also(block).createHandler())

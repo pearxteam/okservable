@@ -96,6 +96,6 @@ open class ObservableCollection<C : MutableCollection<E>, E>(base: C, onUpdate: 
 open class ObservableCollectionRA<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableCollection<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableCollection<E>, E> C.observableCollectionSimple(onUpdate: ObservableCollectionHandlerSimple): IObservableCollection<C, E> = if (this is RandomAccess) ObservableCollectionSimpleRA(this, onUpdate) else ObservableCollectionSimple(this, onUpdate)
-fun <C : MutableCollection<E>, E> C.observableCollection(onUpdate: ObservableCollectionHandler<E>): IObservableCollection<C, E> = if (this is RandomAccess) ObservableCollectionRA(this, onUpdate) else ObservableCollection(this, onUpdate)
-inline fun <C : MutableCollection<E>, E> C.observableCollection(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): IObservableCollection<C, E> = observableCollection(ObservableCollectionHandlerScope<E>().also(block).createHandler())
+fun <C : MutableCollection<E>, E> C.observableCollectionSimple(onUpdate: ObservableCollectionHandlerSimple): MutableCollection<E> = if (this is RandomAccess) ObservableCollectionSimpleRA(this, onUpdate) else ObservableCollectionSimple(this, onUpdate)
+fun <C : MutableCollection<E>, E> C.observableCollection(onUpdate: ObservableCollectionHandler<E>): MutableCollection<E> = if (this is RandomAccess) ObservableCollectionRA(this, onUpdate) else ObservableCollection(this, onUpdate)
+inline fun <C : MutableCollection<E>, E> C.observableCollection(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): MutableCollection<E> = observableCollection(ObservableCollectionHandlerScope<E>().also(block).createHandler())
