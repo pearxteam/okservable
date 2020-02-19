@@ -7,23 +7,12 @@
 
 package net.pearx.okservable.collection
 
-interface IObservableSet<C : MutableSet<E>, E> : IObservableCollection<C, E>, MutableSet<E> {
-    override val size: Int
-        get() = super.size
 
-    override fun contains(element: E): Boolean = super.contains(element)
-
-    override fun containsAll(elements: Collection<E>): Boolean = super.containsAll(elements)
-
-    override fun isEmpty(): Boolean = super.isEmpty()
-}
-
-
-open class ObservableSetSimple<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), IObservableSet<C, E>
+open class ObservableSetSimple<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), MutableSet<E>
 open class ObservableSetSimpleRA<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableSetSimple<C, E>(base, onUpdate), RandomAccess
 
 
-open class ObservableSet<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableCollection<C, E>(base, onUpdate), IObservableSet<C, E>
+open class ObservableSet<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableCollection<C, E>(base, onUpdate), MutableSet<E>
 open class ObservableSetRA<C : MutableSet<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableSet<C, E>(base, onUpdate), RandomAccess
 
 

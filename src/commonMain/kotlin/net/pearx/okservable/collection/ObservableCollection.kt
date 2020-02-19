@@ -12,21 +12,8 @@ import net.pearx.okservable.collection.iterator.ObservableMutableIteratorSimple
 import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 
-interface IObservableCollection<C : MutableCollection<E>, E> : MutableCollection<E> {
-    override val size: Int
-        get() = base.size
 
-    override fun contains(element: E): Boolean = element in base
-
-    override fun containsAll(elements: Collection<E>): Boolean = base.containsAll(elements)
-
-    override fun isEmpty(): Boolean = base.isEmpty()
-
-    val base: C
-}
-
-
-abstract class AbstractObservableCollectionSimple<C : MutableCollection<E>, E>(override val base: C, protected val onUpdate: ObservableCollectionHandlerSimple) : IObservableCollection<C, E> {
+abstract class AbstractObservableCollectionSimple<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableCollectionHandlerSimple) : MutableCollection<E> by base {
     override fun add(element: E): Boolean = base.add(element).ifTrue(onUpdate)
 
     override fun addAll(elements: Collection<E>): Boolean = base.addAll(elements).ifTrue(onUpdate)
@@ -56,7 +43,7 @@ open class ObservableCollectionSimple<C : MutableCollection<E>, E>(base: C, onUp
 open class ObservableCollectionSimpleRA<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), RandomAccess
 
 
-abstract class AbstractObservableCollection<C : MutableCollection<E>, E, U : AbstractObservableCollectionHandler<E>>(override val base: C, protected val onUpdate: U) : IObservableCollection<C, E> {
+abstract class AbstractObservableCollection<C : MutableCollection<E>, E, U : AbstractObservableCollectionHandler<E>>(protected val base: C, protected val onUpdate: U) : MutableCollection<E> by base {
     override fun clear() {
         if(size > 0) {
             val lst = ArrayList(this)
@@ -90,8 +77,6 @@ open class ObservableCollection<C : MutableCollection<E>, E>(base: C, onUpdate: 
     override fun removeAll(elements: Collection<E>): Boolean = removeBulk(elements, true)
 
     override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
-
-
 }
 open class ObservableCollectionRA<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableCollection<C, E>(base, onUpdate), RandomAccess
 

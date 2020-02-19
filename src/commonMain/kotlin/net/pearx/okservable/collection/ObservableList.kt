@@ -13,27 +13,7 @@ import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.subListBy
 
-interface IObservableList<C : MutableList<E>, E> : IObservableCollection<C, E>, MutableList<E> {
-    override val size: Int
-        get() = super.size
-
-    override fun containsAll(elements: Collection<E>): Boolean = super.containsAll(elements)
-
-    override fun contains(element: E): Boolean = super.contains(element)
-
-    override fun isEmpty(): Boolean = super.isEmpty()
-
-    override fun get(index: Int): E = base[index]
-
-    override fun indexOf(element: E): Int = base.indexOf(element)
-
-    override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
-
-    override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = subListBy(this, fromIndex, toIndex)
-}
-
-
-open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate), IObservableList<C, E> {
+open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
     override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate() }
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue(onUpdate)
@@ -45,11 +25,20 @@ open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: Observ
     override fun removeAt(index: Int): E = base.removeAt(index).also { onUpdate() }
 
     override fun set(index: Int, element: E): E = base.set(index, element).also { if (element != it) onUpdate() }
+
+    override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = subListBy(this, fromIndex, toIndex)
+
+    override fun get(index: Int): E = base[index]
+
+    override fun indexOf(element: E): Int = base.indexOf(element)
+
+    override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
 }
+
 open class ObservableListSimpleRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableListSimple<C, E>(base, onUpdate), RandomAccess
 
 
-open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), IObservableList<C, E> {
+open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), MutableList<E> {
     override fun add(element: E): Boolean = add(size, element).let { true }
 
     override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate.onAdd(index, element) }
@@ -82,6 +71,13 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 
     override fun set(index: Int, element: E): E = base.set(index, element).also { onUpdate.onSet(index, it, element) }
 
+    override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = subListBy(this, fromIndex, toIndex)
+
+    override fun get(index: Int): E = base[index]
+
+    override fun indexOf(element: E): Int = base.indexOf(element)
+
+    override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
 }
 
 open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : ObservableList<C, E>(base, onUpdate), RandomAccess

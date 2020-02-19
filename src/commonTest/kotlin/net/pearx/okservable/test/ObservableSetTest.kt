@@ -27,8 +27,10 @@ class ObservableSetTest {
         private val _modifications = mutableListOf<Modification>()
         val modifications: List<Modification>
             get() = _modifications
+        
+        val base = if (empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")
 
-        var collection = (if (empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")).observableSet {
+        val collection = base.observableSet {
             add { element ->
                 _modifications += Modification(Action.ADD, element)
             }
@@ -94,13 +96,13 @@ class ObservableSetTest {
         with(TestingContext()) {
             collection.add("theevilroot")
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
             collection.add("theevilroot1")
             assertEquals(listOf(Modification(Action.ADD, "theevilroot1")), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), base)
         }
     }
 
@@ -109,19 +111,19 @@ class ObservableSetTest {
         with(TestingContext()) {
             collection.addAll(listOf(null, "root"))
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
             collection.addAll(listOf("theevilroot", "theevilroot1"))
             assertEquals(listOf(Modification(Action.ADD, "theevilroot1")), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, "", "theevilroot1"), base)
         }
 
         with(TestingContext()) {
             collection.addAll(listOf("openwrt", "ddwrt"))
             assertEquals(listOf(Modification(Action.ADD, "openwrt"), Modification(Action.ADD, "ddwrt")), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, "", "openwrt", "ddwrt"), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, "", "openwrt", "ddwrt"), base)
         }
     }
 
@@ -130,13 +132,13 @@ class ObservableSetTest {
         with(TestingContext(true)) {
             collection.clear()
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(setOf<String?>(), base)
         }
 
         with(TestingContext()) {
             collection.clear()
             assertEquals(listOf(Modification(Action.CLEAR, listOf("theevilroot", "root", null, ""))), modifications)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(setOf<String?>(), base)
         }
     }
 
@@ -150,7 +152,7 @@ class ObservableSetTest {
             }
             assertEquals(4, num)
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
@@ -163,7 +165,7 @@ class ObservableSetTest {
             }
             assertEquals(4, num)
             assertEquals(listOf(Modification(Action.REMOVE, null)), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", ""), base)
         }
     }
 
@@ -172,13 +174,13 @@ class ObservableSetTest {
         with(TestingContext()) {
             collection.remove("theevilroot1")
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
             collection.remove("theevilroot")
             assertEquals(listOf(Modification(Action.REMOVE, "theevilroot")), modifications)
-            assertEquals(setOf<String?>("root", null, ""), collection.base)
+            assertEquals(setOf<String?>("root", null, ""), base)
         }
     }
 
@@ -187,19 +189,19 @@ class ObservableSetTest {
         with(TestingContext()) {
             collection.removeAll(listOf("openwrt", "ddwrt"))
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
             collection.removeAll(listOf(null, "root"))
             assertEquals(listOf(Modification(Action.REMOVE, "root"), Modification(Action.REMOVE, null)), modifications)
-            assertEquals(setOf<String?>("theevilroot", ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", ""), base)
         }
 
         with(TestingContext()) {
             collection.removeAll(listOf("theevilroot", "theevilroot1"))
             assertEquals(listOf(Modification(Action.REMOVE, "theevilroot")), modifications)
-            assertEquals(setOf<String?>("root", null, ""), collection.base)
+            assertEquals(setOf<String?>("root", null, ""), base)
         }
     }
 
@@ -208,19 +210,19 @@ class ObservableSetTest {
         with(TestingContext()) {
             collection.retainAll(listOf("theevilroot", "root", null, ""))
             assertEquals(listOf(), modifications)
-            assertEquals(setOf<String?>("theevilroot", "root", null, ""), collection.base)
+            assertEquals(setOf<String?>("theevilroot", "root", null, ""), base)
         }
 
         with(TestingContext()) {
             collection.retainAll(listOf(null, "", "theevilroot1"))
             assertEquals(listOf(Modification(Action.REMOVE, "theevilroot"), Modification(Action.REMOVE, "root")), modifications)
-            assertEquals(setOf<String?>(null, ""), collection.base)
+            assertEquals(setOf<String?>(null, ""), base)
         }
 
         with(TestingContext()) {
             collection.retainAll(listOf("theevilroot1"))
             assertEquals(listOf(Modification(Action.REMOVE, "theevilroot"), Modification(Action.REMOVE, "root"), Modification(Action.REMOVE, null), Modification(Action.REMOVE, "")), modifications)
-            assertEquals(setOf<String?>(), collection.base)
+            assertEquals(setOf<String?>(), base)
         }
     }
 }
