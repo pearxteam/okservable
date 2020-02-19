@@ -7,7 +7,7 @@
 
 package net.pearx.okservable.test
 
-import net.pearx.okservable.collection.observable
+import net.pearx.okservable.collection.observableSet
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -28,7 +28,7 @@ class ObservableSetTest {
         val modifications: List<Modification>
             get() = _modifications
 
-        var collection = (if (empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")).observable {
+        var collection = (if (empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")).observableSet {
             add { element ->
                 _modifications += Modification(Action.ADD, element)
             }

@@ -87,9 +87,9 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : ObservableList<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableList<E>, E> C.observableSimple(onUpdate: ObservableListHandlerSimple): IObservableList<C, E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
-fun <C : MutableList<E>, E> C.observable(onUpdate: ObservableListHandler<E>): IObservableList<C, E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
-inline fun <C : MutableList<E>, E> C.observable(crossinline block: ObservableListHandlerScope<E>.() -> Unit): IObservableList<C, E> = observable(ObservableListHandlerScope<E>().also(block).createHandler())
+fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableListHandlerSimple): IObservableList<C, E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
+fun <C : MutableList<E>, E> C.observableList(onUpdate: ObservableListHandler<E>): IObservableList<C, E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
+inline fun <C : MutableList<E>, E> C.observableList(crossinline block: ObservableListHandlerScope<E>.() -> Unit): IObservableList<C, E> = observableList(ObservableListHandlerScope<E>().also(block).createHandler())
 //fun <C : MutableList<E>, E> observableListSimpleBy(base: C, onUpdate: ObservableListHandlerSimple): IObservableList<C, E> = if(base is RandomAccess) ObservableListSimpleRA(base, onUpdate) else ObservableListSimple(base, onUpdate)
 //fun <C : MutableList<E>, E> observableListBy(base: C, onUpdate: ObservableListHandler<E>): IObservableList<C, E> = if(base is RandomAccess) ObservableListRA(base, onUpdate) else ObservableList(base, onUpdate)
 //inline fun <C : MutableList<E>, E> observableListBy(base: C, crossinline block: ObservableListHandlerScope<E>.() -> Unit): IObservableList<C, E> = observableListBy(base, ObservableListHandlerScope<E>().also(block).createHandler())

@@ -7,8 +7,7 @@
 
 package net.pearx.okservable.test
 
-import net.pearx.okservable.collection.ObservableListSimple
-import net.pearx.okservable.collection.observableSimple
+import net.pearx.okservable.collection.observableListSimple
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -16,7 +15,7 @@ import kotlin.test.assertFailsWith
 class ObservableListSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
-        var collection = (if(empty) mutableListOf() else mutableListOf("theevilroot", "root", null, "", "root")).observableSimple { modified = true }
+        var collection = (if(empty) mutableListOf() else mutableListOf("theevilroot", "root", null, "", "root")).observableListSimple { modified = true }
     }
 
     @Test
