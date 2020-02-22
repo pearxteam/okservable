@@ -19,3 +19,14 @@ internal fun <C : MutableCollection<E>, E> C.removeBulk(elements: Collection<E>,
             }
         return modified
 }
+
+internal fun <C : MutableList<E>, E> C.removeBulkRandomAccess(elements: Collection<E>, remove: Boolean): Boolean {
+    var modified = false
+    for(i in 0 until size) {
+        if (get(i) in elements == remove) {
+            removeAt(i)
+            modified = true
+        }
+    }
+    return modified
+}

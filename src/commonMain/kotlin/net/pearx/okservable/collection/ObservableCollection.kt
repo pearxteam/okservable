@@ -13,7 +13,7 @@ import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 
 
-abstract class AbstractObservableCollectionSimple<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableCollection<E> by base {
+open class ObservableCollectionSimple<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableCollection<E> by base {
     override fun add(element: E): Boolean = base.add(element).ifTrue(onUpdate)
 
     override fun addAll(elements: Collection<E>): Boolean = base.addAll(elements).ifTrue(onUpdate)
@@ -39,8 +39,6 @@ abstract class AbstractObservableCollectionSimple<C : MutableCollection<E>, E>(p
 
     override fun toString(): String = base.toString()
 }
-open class ObservableCollectionSimple<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate)
-open class ObservableCollectionSimpleRA<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), RandomAccess
 
 
 abstract class AbstractObservableCollection<C : MutableCollection<E>, E, U : AbstractObservableCollectionHandler<E>>(protected val base: C, protected val onUpdate: U) : MutableCollection<E> by base {
@@ -78,9 +76,8 @@ open class ObservableCollection<C : MutableCollection<E>, E>(base: C, onUpdate: 
 
     override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
 }
-open class ObservableCollectionRA<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : ObservableCollection<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableCollection<E>, E> C.observableCollectionSimple(onUpdate: ObservableHandlerSimple): MutableCollection<E> = if (this is RandomAccess) ObservableCollectionSimpleRA(this, onUpdate) else ObservableCollectionSimple(this, onUpdate)
-fun <C : MutableCollection<E>, E> C.observableCollection(onUpdate: ObservableCollectionHandler<E>): MutableCollection<E> = if (this is RandomAccess) ObservableCollectionRA(this, onUpdate) else ObservableCollection(this, onUpdate)
+fun <C : MutableCollection<E>, E> C.observableCollectionSimple(onUpdate: ObservableHandlerSimple): MutableCollection<E> = ObservableCollectionSimple(this, onUpdate)
+fun <C : MutableCollection<E>, E> C.observableCollection(onUpdate: ObservableCollectionHandler<E>): MutableCollection<E> = ObservableCollection(this, onUpdate)
 inline fun <C : MutableCollection<E>, E> C.observableCollection(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): MutableCollection<E> = observableCollection(ObservableCollectionHandlerScope<E>().also(block).createHandler())

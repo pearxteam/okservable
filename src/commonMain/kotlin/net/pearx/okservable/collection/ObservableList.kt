@@ -11,9 +11,10 @@ import net.pearx.okservable.collection.iterator.ObservableMutableListIterator
 import net.pearx.okservable.collection.iterator.ObservableMutableListIteratorSimple
 import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
+import net.pearx.okservable.internal.removeBulkRandomAccess
 import net.pearx.okservable.internal.subListBy
 
-open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
+open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
     override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate() }
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue(onUpdate)
@@ -38,7 +39,7 @@ open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: Observ
 open class ObservableListSimpleRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableListSimple<C, E>(base, onUpdate), RandomAccess
 
 
-open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), MutableList<E> {
+abstract class AbstractObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), MutableList<E> {
     override fun add(element: E): Boolean = add(size, element).let { true }
 
     override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate.onAdd(index, element) }
@@ -49,19 +50,11 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 
     override fun iterator(): MutableIterator<E> = listIterator()
 
-    override fun remove(element: E): Boolean {
-        val it = iterator()
-        for (el in it)
-            if (el == element) {
-                it.remove()
-                return true
-            }
-        return false
-    }
+    abstract override fun remove(element: E): Boolean
 
-    override fun removeAll(elements: Collection<E>): Boolean = removeBulk(elements, true)
+    abstract override fun removeAll(elements: Collection<E>): Boolean
 
-    override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
+    abstract override fun retainAll(elements: Collection<E>): Boolean
 
     override fun listIterator(): MutableListIterator<E> = listIterator(0)
 
@@ -80,7 +73,38 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
     override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
 }
 
-open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : ObservableList<C, E>(base, onUpdate), RandomAccess
+open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableList<C, E>(base, onUpdate) {
+    override fun removeAll(elements: Collection<E>): Boolean = removeBulk(elements, true)
+
+    override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
+
+    override fun remove(element: E): Boolean {
+        val it = iterator()
+        for (el in it)
+            if (el == element) {
+                it.remove()
+                return true
+            }
+        return false
+    }
+}
+
+open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableList<C, E>(base, onUpdate), RandomAccess {
+    override fun removeAll(elements: Collection<E>): Boolean = removeBulkRandomAccess(elements, true)
+
+    override fun retainAll(elements: Collection<E>): Boolean = removeBulkRandomAccess(elements, false)
+
+    override fun remove(element: E): Boolean {
+        for(i in 0 until size) {
+            val el = get(i)
+            if(el == element) {
+                removeAt(i)
+                return true
+            }
+        }
+        return false
+    }
+}
 
 
 fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableHandlerSimple): MutableList<E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
