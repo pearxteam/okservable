@@ -11,7 +11,7 @@ class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, pro
         get() = base.values.observableCollectionSimple(onUpdate)
 
     override fun clear() {
-        if(size > 0) {
+        if (size > 0) {
             base.clear()
             onUpdate()
         }
@@ -19,18 +19,17 @@ class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, pro
 
     override fun put(key: K, value: V): V? {
         val prev = base.put(key, value)
-        if(prev != value)
-            onUpdate()
+        onUpdate()
         return prev
     }
 
     override fun putAll(from: Map<out K, V>) {
-        for((key, value) in from)
+        for ((key, value) in from)
             put(key, value)
     }
 
     override fun remove(key: K): V? {
-        if(containsKey(key)) {
+        if (containsKey(key)) {
             val prev = base.remove(key)
             onUpdate()
             return prev
