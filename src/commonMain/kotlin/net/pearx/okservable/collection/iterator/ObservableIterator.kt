@@ -10,9 +10,9 @@
 package net.pearx.okservable.collection.iterator
 
 import net.pearx.okservable.collection.ObservableCollectionHandler
-import net.pearx.okservable.collection.ObservableCollectionHandlerSimple
+import net.pearx.okservable.collection.ObservableHandlerSimple
 
-class ObservableMutableIteratorSimple<T>(private val base: MutableIterator<T>, private val onUpdate: ObservableCollectionHandlerSimple) : MutableIterator<T> by base {
+class ObservableMutableIteratorSimple<T>(private val base: MutableIterator<T>, private val onUpdate: ObservableHandlerSimple) : MutableIterator<T> by base {
     override fun remove() {
         base.remove()
         onUpdate()

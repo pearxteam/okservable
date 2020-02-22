@@ -7,8 +7,7 @@
 
 package net.pearx.okservable.collection
 
-typealias ObservableCollectionHandlerSimple = () -> Unit
-typealias ObservableListHandlerSimple = () -> Unit
+typealias ObservableHandlerSimple = () -> Unit
 
 
 interface AbstractObservableCollectionHandler<T> {

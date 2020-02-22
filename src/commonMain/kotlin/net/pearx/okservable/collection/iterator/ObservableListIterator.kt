@@ -10,10 +10,10 @@
 package net.pearx.okservable.collection.iterator
 
 import net.pearx.okservable.collection.ObservableListHandler
-import net.pearx.okservable.collection.ObservableListHandlerSimple
+import net.pearx.okservable.collection.ObservableHandlerSimple
 import kotlin.math.max
 
-class ObservableMutableListIteratorSimple<T>(private val base: MutableListIterator<T>, private val onUpdate: ObservableListHandlerSimple) : MutableListIterator<T> by base {
+class ObservableMutableListIteratorSimple<T>(private val base: MutableListIterator<T>, private val onUpdate: ObservableHandlerSimple) : MutableListIterator<T> by base {
     private var lastElement: T? = null
 
     override fun next(): T = base.next().also { lastElement = it }

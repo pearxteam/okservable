@@ -13,7 +13,7 @@ import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.subListBy
 
-open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
+open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : AbstractObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
     override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate() }
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue(onUpdate)
@@ -35,7 +35,7 @@ open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: Observ
     override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
 }
 
-open class ObservableListSimpleRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableCollectionHandlerSimple) : ObservableListSimple<C, E>(base, onUpdate), RandomAccess
+open class ObservableListSimpleRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableListSimple<C, E>(base, onUpdate), RandomAccess
 
 
 open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), MutableList<E> {
@@ -83,6 +83,6 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : ObservableList<C, E>(base, onUpdate), RandomAccess
 
 
-fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableListHandlerSimple): MutableList<E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
+fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableHandlerSimple): MutableList<E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
 fun <C : MutableList<E>, E> C.observableList(onUpdate: ObservableListHandler<E>): MutableList<E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
 inline fun <C : MutableList<E>, E> C.observableList(crossinline block: ObservableListHandlerScope<E>.() -> Unit): MutableList<E> = observableList(ObservableListHandlerScope<E>().also(block).createHandler())
