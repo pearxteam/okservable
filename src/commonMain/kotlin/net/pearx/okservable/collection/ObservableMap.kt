@@ -19,7 +19,8 @@ class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, pro
 
     override fun put(key: K, value: V): V? {
         val prev = base.put(key, value)
-        onUpdate()
+        if(value !== value)
+            onUpdate()
         return prev
     }
 
