@@ -25,11 +25,16 @@ interface ObservableListHandler<T> : AbstractObservableCollectionHandler<T> {
     fun onSet(index: Int, prevValue: T, newValue: T)
 }
 
+interface ObservableMapHandler<K, V> {
+    fun onClear(elements: Map<K, V>)
+    fun onPut(key: K, prevValue: V?, value: V)
+    fun onRemove(key: K, value: V)
+}
 
 private typealias ClearBlock<T> = (elements: Collection<T>) -> Unit
 
 abstract class AbstractObservableCollectionHandlerScope<T> {
-    private lateinit var clearBlock: ClearBlock<T>
+    private var clearBlock: ClearBlock<T>? = null
 
     fun clear(block: ClearBlock<T>) {
         clearBlock = block
@@ -37,7 +42,7 @@ abstract class AbstractObservableCollectionHandlerScope<T> {
 
     protected abstract inner class Handler : AbstractObservableCollectionHandler<T> {
         override fun onClear(elements: Collection<T>) {
-            clearBlock(elements)
+            clearBlock?.invoke(elements)
         }
     }
 }
@@ -45,8 +50,8 @@ abstract class AbstractObservableCollectionHandlerScope<T> {
 private typealias CollectionElementBlock<T> = (element: T) -> Unit
 
 class ObservableCollectionHandlerScope<T> : AbstractObservableCollectionHandlerScope<T>() {
-    private lateinit var addBlock: CollectionElementBlock<T>
-    private lateinit var removeBlock: CollectionElementBlock<T>
+    private var addBlock: CollectionElementBlock<T>? = null
+    private var removeBlock: CollectionElementBlock<T>? = null
 
     fun add(block: CollectionElementBlock<T>) {
         addBlock = block
@@ -58,11 +63,11 @@ class ObservableCollectionHandlerScope<T> : AbstractObservableCollectionHandlerS
 
     private inner class Handler : AbstractObservableCollectionHandlerScope<T>.Handler(), ObservableCollectionHandler<T> {
         override fun onAdd(element: T) {
-            addBlock(element)
+            addBlock?.invoke(element)
         }
 
         override fun onRemove(element: T) {
-            removeBlock(element)
+            removeBlock?.invoke(element)
         }
     }
 
@@ -76,9 +81,9 @@ private typealias ListSetBlock<T> = (index: Int, prevElement: T, newElement: T) 
 
 
 class ObservableListHandlerScope<T> : AbstractObservableCollectionHandlerScope<T>() {
-    private lateinit var addBlock: ListElementBlock<T>
-    private lateinit var removeBlock: ListElementBlock<T>
-    private lateinit var setBlock: ListSetBlock<T>
+    private var addBlock: ListElementBlock<T>? = null
+    private var removeBlock: ListElementBlock<T>? = null
+    private var setBlock: ListSetBlock<T>? = null
 
     fun add(block: ListElementBlock<T>) {
         addBlock = block
@@ -94,18 +99,57 @@ class ObservableListHandlerScope<T> : AbstractObservableCollectionHandlerScope<T
 
     private inner class Handler : AbstractObservableCollectionHandlerScope<T>.Handler(), ObservableListHandler<T> {
         override fun onAdd(index: Int, element: T) {
-            addBlock(index, element)
+            addBlock?.invoke(index, element)
         }
 
         override fun onRemove(index: Int, element: T) {
-            removeBlock(index, element)
+            removeBlock?.invoke(index, element)
         }
 
         override fun onSet(index: Int, prevValue: T, newValue: T) {
-            setBlock(index, prevValue, newValue)
+            setBlock?.invoke(index, prevValue, newValue)
         }
     }
 
     @PublishedApi
     internal fun createHandler(): ObservableListHandler<T> = Handler()
+}
+
+private typealias MapClearBlock<K, V> = (elements: Map<K, V>) -> Unit
+private typealias MapPutBlock<K, V> = (key: K, prevValue: V?, value: V) -> Unit
+private typealias MapRemoveBlock<K, V> = (key: K, value: V) -> Unit
+
+class ObservableMapHandlerScope<K, V> {
+    private var clearBlock: MapClearBlock<K, V>? = null
+    private var putBlock: MapPutBlock<K, V>? = null
+    private var removeBlock: MapRemoveBlock<K, V>? = null
+
+    fun clear(block: MapClearBlock<K, V>) {
+        clearBlock = block
+    }
+
+    fun put(block: MapPutBlock<K, V>) {
+        putBlock = block
+    }
+
+    fun remove(block: MapRemoveBlock<K, V>) {
+        removeBlock = block
+    }
+
+    private inner class Handler : ObservableMapHandler<K, V> {
+        override fun onClear(elements: Map<K, V>) {
+            clearBlock?.invoke(elements)
+        }
+
+        override fun onPut(key: K, prevValue: V?, value: V) {
+            putBlock?.invoke(key, prevValue, value)
+        }
+
+        override fun onRemove(key: K, value: V) {
+            removeBlock?.invoke(key, value)
+        }
+    }
+
+    @PublishedApi
+    internal fun createHandler(): ObservableMapHandler<K, V> = Handler()
 }
