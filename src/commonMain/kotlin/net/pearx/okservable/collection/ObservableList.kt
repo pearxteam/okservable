@@ -9,6 +9,7 @@ package net.pearx.okservable.collection
 
 import net.pearx.okservable.collection.iterator.ObservableMutableListIterator
 import net.pearx.okservable.collection.iterator.ObservableMutableListIteratorSimple
+import net.pearx.okservable.internal.*
 import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.removeBulkRandomAccess
@@ -78,15 +79,7 @@ open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableLi
 
     override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
 
-    override fun remove(element: E): Boolean {
-        val it = iterator()
-        for (el in it)
-            if (el == element) {
-                it.remove()
-                return true
-            }
-        return false
-    }
+    override fun remove(element: E): Boolean = removeSingle(element)
 }
 
 open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableList<C, E>(base, onUpdate), RandomAccess {
@@ -94,16 +87,7 @@ open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: Observable
 
     override fun retainAll(elements: Collection<E>): Boolean = removeBulkRandomAccess(elements, false)
 
-    override fun remove(element: E): Boolean {
-        for(i in 0 until size) {
-            val el = get(i)
-            if(el == element) {
-                removeAt(i)
-                return true
-            }
-        }
-        return false
-    }
+    override fun remove(element: E): Boolean = removeSingleRandomAccess(element)
 }
 
 
