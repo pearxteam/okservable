@@ -1,6 +1,8 @@
+@file:Suppress("UNCHECKED_CAST")
+
 package net.pearx.okservable.collection
 
-class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableMap<K, V> by base {
+open class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableMap<K, V> by base {
     override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
         get() = base.entries.observableSetSimple(onUpdate)
 
@@ -45,7 +47,7 @@ class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, pro
     override fun toString(): String = base.toString()
 }
 
-class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableMapHandler<K, V>) : MutableMap<K, V> by base {
+open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableMapHandler<K, V>) : MutableMap<K, V> by base {
     override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
         get() = throw NotImplementedError() // todo
 
