@@ -22,33 +22,36 @@ internal fun <C : MutableCollection<E>, E> C.removeBulk(elements: Collection<E>,
 
 internal fun <C : MutableCollection<E>, E> C.removeSingle(element: E): Boolean {
     val it = iterator()
-    var modified = false
     for (el in it)
         if (el == element) {
             it.remove()
-            modified = true
+            return true
         }
-    return modified
+    return false
 }
 
 internal fun <C : MutableList<E>, E> C.removeBulkRandomAccess(elements: Collection<E>, remove: Boolean): Boolean {
     var modified = false
-    for(i in 0 until size) {
+    var i = 0
+    while(i < size) {
         if (get(i) in elements == remove) {
             removeAt(i)
             modified = true
         }
+        else
+            i++
     }
     return modified
 }
 
 internal fun <C : MutableList<E>, E> C.removeSingleRandomAccess(element: E): Boolean {
-    var modified = false
-    for(i in 0 until size) {
+    var i = 0
+    while(i < size) {
         if (get(i) == element) {
             removeAt(i)
-            modified = true
+            return true
         }
+        i++
     }
-    return modified
+    return false
 }
