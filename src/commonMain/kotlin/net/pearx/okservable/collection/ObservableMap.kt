@@ -24,7 +24,7 @@ open class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C
 
     override fun put(key: K, value: V): V? {
         val prev = base.put(key, value)
-        if (value !== value)
+        if (prev !== value)
             onUpdate()
         return prev
     }
@@ -216,6 +216,8 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
         }
         return null
     }
+
+
 
     private fun forceRemove(key: K): V {
         val prev = base.remove(key)
