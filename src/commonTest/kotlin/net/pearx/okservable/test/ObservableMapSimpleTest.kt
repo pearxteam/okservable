@@ -42,10 +42,6 @@ class ObservableMapSimpleTest {
                 assertEquals(null, get(""))
                 assertEquals(null, get("non-existing"))
 
-                assertEquals("root", getOrDefault("theevilroot", "default"))
-                assertEquals(null, getOrDefault("", "default"))
-                assertEquals("default", getOrDefault("non-existing", "default"))
-
                 assertEquals("{theevilroot=root, null=, =null, superuser=root}", toString())
                 assertEquals(mutableMapOf("theevilroot" to "root", null to "", "" to null, "superuser" to "root").hashCode(), hashCode())
                 assertTrue(this == mutableMapOf("theevilroot" to "root", null to "", "" to null, "superuser" to "root"))
@@ -123,27 +119,6 @@ class ObservableMapSimpleTest {
 
         with(TestingContext()) {
             map.remove("theevilroot")
-            assertEquals(true, modified)
-            assertEquals(mapOf(null to "", "" to null, "superuser" to "root"), base)
-        }
-    }
-
-    @Test
-    fun testRemovWithValue() {
-        with(TestingContext()) {
-            map.remove("non-existing", "abc")
-            assertEquals(false, modified)
-            assertEquals(mapOf("theevilroot" to "root", null to "", "" to null, "superuser" to "root"), base)
-        }
-
-        with(TestingContext()) {
-            map.remove("theevilroot", "root1")
-            assertEquals(false, modified)
-            assertEquals(mapOf("theevilroot" to "root", null to "", "" to null, "superuser" to "root"), base)
-        }
-
-        with(TestingContext()) {
-            map.remove("theevilroot", "root")
             assertEquals(true, modified)
             assertEquals(mapOf(null to "", "" to null, "superuser" to "root"), base)
         }
