@@ -47,7 +47,7 @@ abstract class AbstractObservableList<C : MutableList<E>, E>(base: C, onUpdate: 
 
     override fun addAll(elements: Collection<E>): Boolean = addAll(size, elements)
 
-    override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue { elements.forEach { onUpdate.onAdd(index, it) } }
+    override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue { elements.forEachIndexed { i, element -> onUpdate.onAdd(index + i, element) } }
 
     override fun iterator(): MutableIterator<E> = listIterator()
 
