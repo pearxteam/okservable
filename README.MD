@@ -27,8 +27,6 @@ Multiplatform Kotlin library containing observable data structures, such as Obse
 
 2. Use the library and have fun!
 
-# The Idea
-
 # Examples
  - Creating a simple observable list:
 ```kotlin
