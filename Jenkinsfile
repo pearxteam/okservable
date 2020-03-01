@@ -38,8 +38,8 @@ pipeline {
     post {
         always {
             ciSkip 'postProcess'
-            junit 'modules/*/build/test-results-prefixed/**/*.xml'
-            jacoco classPattern: 'modules/*/build/classes/kotlin/jvm/*', execPattern: 'modules/*/build/jacoco/*.exec', sourcePattern: 'modules/*/src/*/kotlin', sourceInclusionPattern: '**/*.kt'
+            junit 'build/test-results-prefixed/**/*.xml'
+            jacoco classPattern: 'build/classes/kotlin/jvm/*', execPattern: 'build/jacoco/*.exec', sourcePattern: 'src/*/kotlin', sourceInclusionPattern: '**/*.kt'
         }
     }
 }
