@@ -1,3 +1,5 @@
+import net.pearx.multigradle.plugin.modular.MultiGradleModularSettings
+
 rootProject.name = "okservable"
 
 pluginManagement {
@@ -11,3 +13,15 @@ pluginManagement {
         id("com.github.breadmoirai.github-release") version githubReleaseVersion
     }
 }
+
+buildscript {
+    val multigradleVersion: String by settings
+    repositories {
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath("net.pearx.multigradle:multigradle:$multigradleVersion")
+    }
+}
+
+apply<MultiGradleModularSettings>()
