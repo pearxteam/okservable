@@ -12,49 +12,35 @@ package net.pearx.okservable.collection
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.removeSingle
 
-open class ObservableMapSimple<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableMap<K, V> by base {
-    override val entries: MutableSet<MutableMap.MutableEntry<K, V>>
-        get() = base.entries.observableSetSimple(onUpdate)
+inline class ObservableMapScope<out K, out V>(val event: ObservableMapEvent<K, V>)
 
-    override val keys: MutableSet<K>
-        get() = base.keys.observableSetSimple(onUpdate)
+typealias ObservableMapHandler<K, V> = ObservableMapScope<K, V>.() -> Unit
 
-    override val values: MutableCollection<V>
-        get() = base.values.observableCollectionSimple(onUpdate)
+internal fun <K, V> ObservableMapHandler<K, V>.send(event: ObservableMapEvent<K, V>) = this(ObservableMapScope(event))
 
-    override fun clear() {
-        if (size > 0) {
-            base.clear()
-            onUpdate()
-        }
-    }
+sealed class ObservableMapEvent<out K, out V> {
+    class PreClear<out K, out V> : ObservableMapEvent<K, V>()
+    class PostClear<out K, out V> : ObservableMapEvent<K, V>()
+    class ElementPut<out K, out V>(val key: K, val prevValue: V?, val newValue: V) : ObservableMapEvent<K, V>()
+    class ElementRemoved<out K, out V>(val key: K, val value: V) : ObservableMapEvent<K, V>()
+}
 
-    override fun put(key: K, value: V): V? {
-        val prev = base.put(key, value)
-        if (prev !== value)
-            onUpdate()
-        return prev
-    }
+inline fun <K, V> ObservableMapScope<K, V>.preClear(block: () -> Unit) {
+    if (event is ObservableMapEvent.PreClear) block()
+}
 
-    override fun putAll(from: Map<out K, V>) {
-        for ((key, value) in from)
-            put(key, value)
-    }
+inline fun <K, V> ObservableMapScope<K, V>.postClear(block: () -> Unit) {
+    if (event is ObservableMapEvent.PostClear) block()
+}
 
-    override fun remove(key: K): V? {
-        if (containsKey(key)) {
-            val prev = base.remove(key)
-            onUpdate()
-            return prev
-        }
-        return null
-    }
+inline fun <K, V> ObservableMapScope<K, V>.put(block: (key: K, prevValue: V?, newValue: V) -> Unit) {
+    val event = event
+    if (event is ObservableMapEvent.ElementPut) block(event.key, event.prevValue, event.newValue)
+}
 
-    override fun equals(other: Any?): Boolean = base == other
-
-    override fun hashCode(): Int = base.hashCode()
-
-    override fun toString(): String = base.toString()
+inline fun <K, V> ObservableMapScope<K, V>.remove(block: (key: K, value: V) -> Unit) {
+    val event = event
+    if (event is ObservableMapEvent.ElementRemoved) block(event.key, event.value)
 }
 
 open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, protected val onUpdate: ObservableMapHandler<K, V>) : MutableMap<K, V> by base {
@@ -82,7 +68,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
                                 override fun setValue(newValue: V): V {
                                     val prev = next.setValue(newValue)
                                     if(prev !== newValue)
-                                        onUpdate.onPut(key, prev, newValue)
+                                        onUpdate.send(ObservableMapEvent.ElementPut(key, prev, newValue))
                                     return prev
                                 }
                             }
@@ -90,7 +76,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
                         override fun remove() {
                             baseItr.remove()
-                            onUpdate.onRemove(lastElement!!.key, lastElement!!.value)
+                            onUpdate.send(ObservableMapEvent.ElementRemoved(lastElement!!.key, lastElement!!.value))
                         }
                     }
                 }
@@ -137,7 +123,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
                         override fun remove() {
                             baseItr.remove()
-                            onUpdate.onRemove(lastElement!!.key, lastElement!!.value)
+                            onUpdate.send(ObservableMapEvent.ElementRemoved(lastElement!!.key, lastElement!!.value))
                         }
                     }
                 }
@@ -184,7 +170,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
                         override fun remove() {
                             baseItr.remove()
-                            onUpdate.onRemove(lastElement!!.key, lastElement!!.value)
+                            onUpdate.send(ObservableMapEvent.ElementRemoved(lastElement!!.key, lastElement!!.value))
                         }
                     }
                 }
@@ -199,16 +185,16 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
     override fun clear() {
         if (size > 0) {
-            val prev = HashMap(this)
+            onUpdate.send(ObservableMapEvent.PreClear())
             base.clear()
-            onUpdate.onClear(prev)
+            onUpdate.send(ObservableMapEvent.PostClear())
         }
     }
 
     override fun put(key: K, value: V): V? {
         val prev = base.put(key, value)
         if (prev !== value)
-            onUpdate.onPut(key, prev, value)
+            onUpdate.send(ObservableMapEvent.ElementPut(key, prev, value))
         return prev
     }
 
@@ -228,7 +214,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
     private fun forceRemove(key: K): V {
         val prev = base.remove(key)
-        onUpdate.onRemove(key, prev as V)
+        onUpdate.send(ObservableMapEvent.ElementRemoved(key, prev as V))
         return prev
     }
 
@@ -239,6 +225,4 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
     override fun toString(): String = base.toString()
 }
 
-fun <C : MutableMap<K, V>, K, V> C.observableMapSimple(onUpdate: ObservableHandlerSimple): MutableMap<K, V> = ObservableMapSimple(this, onUpdate)
 fun <C : MutableMap<K, V>, K, V> C.observableMap(onUpdate: ObservableMapHandler<K, V>): MutableMap<K, V> = ObservableMap(this, onUpdate)
-inline fun <C : MutableMap<K, V>, K, V> C.observableMap(crossinline block: ObservableMapHandlerScope<K, V>.() -> Unit): MutableMap<K, V> = observableMap(ObservableMapHandlerScope<K, V>().also(block).createHandler())

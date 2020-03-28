@@ -8,46 +8,57 @@
 package net.pearx.okservable.collection
 
 import net.pearx.okservable.collection.iterator.ObservableMutableListIterator
-import net.pearx.okservable.collection.iterator.ObservableMutableListIteratorSimple
 import net.pearx.okservable.internal.*
 import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.removeBulkRandomAccess
 import net.pearx.okservable.internal.subListBy
 
-open class ObservableListSimple<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableCollectionSimple<C, E>(base, onUpdate), MutableList<E> {
-    override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate() }
+inline class ObservableListScope<out T>(val event: ObservableListEvent<T>)
 
-    override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue(onUpdate)
+typealias ObservableListHandler<T> = ObservableListScope<T>.() -> Unit
 
-    override fun listIterator(): MutableListIterator<E> = ObservableMutableListIteratorSimple(base.listIterator(), onUpdate)
+internal fun <T> ObservableListHandler<T>.send(event: ObservableListEvent<T>) = this(ObservableListScope(event))
 
-    override fun listIterator(index: Int): MutableListIterator<E> = ObservableMutableListIteratorSimple(base.listIterator(index), onUpdate)
-
-    override fun removeAt(index: Int): E = base.removeAt(index).also { onUpdate() }
-
-    override fun set(index: Int, element: E): E = base.set(index, element).also { if (element != it) onUpdate() }
-
-    override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = subListBy(this, fromIndex, toIndex)
-
-    override fun get(index: Int): E = base[index]
-
-    override fun indexOf(element: E): Int = base.indexOf(element)
-
-    override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
+sealed class ObservableListEvent<out T> {
+    class PreClear<out T> : ObservableListEvent<T>()
+    class PostClear<out T> : ObservableListEvent<T>()
+    class ElementAdded<out T>(val index: Int, val element: T) : ObservableListEvent<T>()
+    class ElementRemoved<out T>(val index: Int, val element: T) : ObservableListEvent<T>()
+    class ElementSet<out T>(val index: Int, val prevElement: T, val newElement: T) : ObservableListEvent<T>()
 }
 
-open class ObservableListSimpleRA<C : MutableList<E>, E>(base: C, onUpdate: ObservableHandlerSimple) : ObservableListSimple<C, E>(base, onUpdate), RandomAccess
+inline fun <T> ObservableListScope<T>.preClear(block: () -> Unit) {
+    if (event is ObservableListEvent.PreClear) block()
+}
 
+inline fun <T> ObservableListScope<T>.postClear(block: () -> Unit) {
+    if (event is ObservableListEvent.PostClear) block()
+}
 
-abstract class AbstractObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableCollection<C, E, ObservableListHandler<E>>(base, onUpdate), MutableList<E> {
+inline fun <T> ObservableListScope<T>.add(block: (index: Int, element: T) -> Unit) {
+    val event = event
+    if (event is ObservableListEvent.ElementAdded) block(event.index, event.element)
+}
+
+inline fun <T> ObservableListScope<T>.remove(block: (index: Int, element: T) -> Unit) {
+    val event = event
+    if (event is ObservableListEvent.ElementRemoved) block(event.index, event.element)
+}
+
+inline fun <T> ObservableListScope<T>.set(block: (index: Int, prevElement: T, newElement: T) -> Unit) {
+    val event = event
+    if (event is ObservableListEvent.ElementSet) block(event.index, event.prevElement, event.newElement)
+}
+
+abstract class AbstractObservableList<C : MutableList<E>, E>(protected val base: C, protected val onUpdate: ObservableListHandler<E>) : MutableList<E> by base {
     override fun add(element: E): Boolean = add(size, element).let { true }
 
-    override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate.onAdd(index, element) }
+    override fun add(index: Int, element: E) = base.add(index, element).also { onUpdate.send(ObservableListEvent.ElementAdded(index, element)) }
 
     override fun addAll(elements: Collection<E>): Boolean = addAll(size, elements)
 
-    override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue { elements.forEachIndexed { i, element -> onUpdate.onAdd(index + i, element) } }
+    override fun addAll(index: Int, elements: Collection<E>): Boolean = base.addAll(index, elements).ifTrue { elements.forEachIndexed { i, element -> onUpdate.send(ObservableListEvent.ElementAdded(index + i, element)) } }
 
     override fun iterator(): MutableIterator<E> = listIterator()
 
@@ -61,9 +72,9 @@ abstract class AbstractObservableList<C : MutableList<E>, E>(base: C, onUpdate: 
 
     override fun listIterator(index: Int): MutableListIterator<E> = ObservableMutableListIterator(base.listIterator(index), onUpdate)
 
-    override fun removeAt(index: Int): E = base.removeAt(index).also { onUpdate.onRemove(index, it) }
+    override fun removeAt(index: Int): E = base.removeAt(index).also { onUpdate.send(ObservableListEvent.ElementRemoved(index, it)) }
 
-    override fun set(index: Int, element: E): E = base.set(index, element).also { onUpdate.onSet(index, it, element) }
+    override fun set(index: Int, element: E): E = base.set(index, element).also { onUpdate.send(ObservableListEvent.ElementSet(index, it, element)) }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> = subListBy(this, fromIndex, toIndex)
 
@@ -72,6 +83,20 @@ abstract class AbstractObservableList<C : MutableList<E>, E>(base: C, onUpdate: 
     override fun indexOf(element: E): Int = base.indexOf(element)
 
     override fun lastIndexOf(element: E): Int = base.lastIndexOf(element)
+
+    override fun clear() {
+        if(size > 0) {
+            onUpdate.send(ObservableListEvent.PreClear())
+            base.clear()
+            onUpdate.send(ObservableListEvent.PostClear())
+        }
+    }
+
+    override fun equals(other: Any?): Boolean = base == other
+
+    override fun hashCode(): Int = base.hashCode()
+
+    override fun toString(): String = base.toString()
 }
 
 open class ObservableList<C : MutableList<E>, E>(base: C, onUpdate: ObservableListHandler<E>) : AbstractObservableList<C, E>(base, onUpdate) {
@@ -91,6 +116,4 @@ open class ObservableListRA<C : MutableList<E>, E>(base: C, onUpdate: Observable
 }
 
 
-fun <C : MutableList<E>, E> C.observableListSimple(onUpdate: ObservableHandlerSimple): MutableList<E> = if (this is RandomAccess) ObservableListSimpleRA(this, onUpdate) else ObservableListSimple(this, onUpdate)
 fun <C : MutableList<E>, E> C.observableList(onUpdate: ObservableListHandler<E>): MutableList<E> = if (this is RandomAccess) ObservableListRA(this, onUpdate) else ObservableList(this, onUpdate)
-inline fun <C : MutableList<E>, E> C.observableList(crossinline block: ObservableListHandlerScope<E>.() -> Unit): MutableList<E> = observableList(ObservableListHandlerScope<E>().also(block).createHandler())

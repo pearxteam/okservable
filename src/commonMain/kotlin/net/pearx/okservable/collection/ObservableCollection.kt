@@ -8,56 +8,50 @@
 package net.pearx.okservable.collection
 
 import net.pearx.okservable.collection.iterator.ObservableMutableIterator
-import net.pearx.okservable.collection.iterator.ObservableMutableIteratorSimple
 import net.pearx.okservable.internal.ifTrue
 import net.pearx.okservable.internal.removeBulk
 
+inline class ObservableCollectionScope<out T>(val event: ObservableCollectionEvent<T>)
 
-open class ObservableCollectionSimple<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableHandlerSimple) : MutableCollection<E> by base {
-    override fun add(element: E): Boolean = base.add(element).ifTrue(onUpdate)
+typealias ObservableCollectionHandler<T> = ObservableCollectionScope<T>.() -> Unit
 
-    override fun addAll(elements: Collection<E>): Boolean = base.addAll(elements).ifTrue(onUpdate)
+internal fun <T> ObservableCollectionHandler<T>.send(event: ObservableCollectionEvent<T>) = this(ObservableCollectionScope(event))
 
-    override fun clear() {
-        val previousSize = base.size
-        base.clear()
-        if (previousSize != base.size)
-            onUpdate()
-    }
-
-    override fun iterator(): MutableIterator<E> = ObservableMutableIteratorSimple(base.iterator(), onUpdate)
-
-    override fun remove(element: E): Boolean = base.remove(element).ifTrue(onUpdate)
-
-    override fun removeAll(elements: Collection<E>): Boolean = base.removeAll(elements).ifTrue(onUpdate)
-
-    override fun retainAll(elements: Collection<E>): Boolean = base.retainAll(elements).ifTrue(onUpdate)
-
-    override fun equals(other: Any?): Boolean = base == other
-
-    override fun hashCode(): Int = base.hashCode()
-
-    override fun toString(): String = base.toString()
+sealed class ObservableCollectionEvent<out T> {
+    class PreClear<out T> : ObservableCollectionEvent<T>()
+    class PostClear<out T> : ObservableCollectionEvent<T>()
+    class ElementAdded<out T>(val element: T) : ObservableCollectionEvent<T>()
+    class ElementRemoved<out T>(val element: T) : ObservableCollectionEvent<T>()
 }
 
+inline fun <T> ObservableCollectionScope<T>.preClear(block: () -> Unit) {
+    if (event is ObservableCollectionEvent.PreClear) block()
+}
 
-abstract class AbstractObservableCollection<C : MutableCollection<E>, E, U : AbstractObservableCollectionHandler<E>>(protected val base: C, protected val onUpdate: U) : MutableCollection<E> by base {
+inline fun <T> ObservableCollectionScope<T>.postClear(block: () -> Unit) {
+    if (event is ObservableCollectionEvent.PostClear) block()
+}
+
+inline fun <T> ObservableCollectionScope<T>.add(block: (T) -> Unit) {
+    val event = event
+    if (event is ObservableCollectionEvent.ElementAdded) block(event.element)
+}
+
+inline fun <T> ObservableCollectionScope<T>.remove(block: (T) -> Unit) {
+    val event = event
+    if (event is ObservableCollectionEvent.ElementRemoved) block(event.element)
+}
+
+open class ObservableCollection<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableCollectionHandler<E>) : MutableCollection<E> by base {
     override fun clear() {
         if(size > 0) {
-            val lst = ArrayList(this)
+            onUpdate.send(ObservableCollectionEvent.PreClear())
             base.clear()
-            onUpdate.onClear(lst)
+            onUpdate.send(ObservableCollectionEvent.PostClear())
         }
     }
 
-    override fun equals(other: Any?): Boolean = base == other
-
-    override fun hashCode(): Int = base.hashCode()
-
-    override fun toString(): String = base.toString()
-}
-open class ObservableCollection<C : MutableCollection<E>, E>(base: C, onUpdate: ObservableCollectionHandler<E>) : AbstractObservableCollection<C, E, ObservableCollectionHandler<E>>(base, onUpdate) {
-    override fun add(element: E): Boolean = base.add(element).ifTrue { onUpdate.onAdd(element) }
+    override fun add(element: E): Boolean = base.add(element).ifTrue { onUpdate.send(ObservableCollectionEvent.ElementAdded(element)) }
 
     override fun addAll(elements: Collection<E>): Boolean {
         var modified = false
@@ -70,14 +64,18 @@ open class ObservableCollection<C : MutableCollection<E>, E>(base: C, onUpdate: 
 
     override fun iterator(): MutableIterator<E> = ObservableMutableIterator(base.iterator(), onUpdate)
 
-    override fun remove(element: E): Boolean = base.remove(element).ifTrue { onUpdate.onRemove(element) }
+    override fun remove(element: E): Boolean = base.remove(element).ifTrue { onUpdate.send(ObservableCollectionEvent.ElementRemoved(element)) }
 
     override fun removeAll(elements: Collection<E>): Boolean = removeBulk(elements, true)
 
     override fun retainAll(elements: Collection<E>): Boolean = removeBulk(elements, false)
+
+    override fun equals(other: Any?): Boolean = base == other
+
+    override fun hashCode(): Int = base.hashCode()
+
+    override fun toString(): String = base.toString()
 }
 
 
-fun <C : MutableCollection<E>, E> C.observableCollectionSimple(onUpdate: ObservableHandlerSimple): MutableCollection<E> = ObservableCollectionSimple(this, onUpdate)
 fun <C : MutableCollection<E>, E> C.observableCollection(onUpdate: ObservableCollectionHandler<E>): MutableCollection<E> = ObservableCollection(this, onUpdate)
-inline fun <C : MutableCollection<E>, E> C.observableCollection(crossinline block: ObservableCollectionHandlerScope<E>.() -> Unit): MutableCollection<E> = observableCollection(ObservableCollectionHandlerScope<E>().also(block).createHandler())

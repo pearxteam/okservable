@@ -7,7 +7,10 @@
 
 package net.pearx.okservable.test
 
+import net.pearx.okservable.collection.add
 import net.pearx.okservable.collection.observableSet
+import net.pearx.okservable.collection.preClear
+import net.pearx.okservable.collection.remove
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,6 +33,7 @@ class ObservableSetTest {
         
         val base = if (empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")
 
+
         val collection = base.observableSet {
             add { element ->
                 _modifications += Modification(Action.ADD, element)
@@ -37,8 +41,8 @@ class ObservableSetTest {
             remove { element ->
                 _modifications += Modification(Action.REMOVE, element)
             }
-            clear { elements ->
-                _modifications += Modification(Action.CLEAR, elements)
+            preClear {
+                _modifications += Modification(Action.CLEAR, HashSet(base))
             }
         }
     }
@@ -130,7 +134,7 @@ class ObservableSetTest {
 
         with(TestingContext()) {
             collection.clear()
-            assertEquals(listOf(Modification(Action.CLEAR, listOf("theevilroot", "root", null, ""))), modifications)
+            assertEquals(listOf(Modification(Action.CLEAR, setOf("theevilroot", "root", null, ""))), modifications)
             assertEquals(setOf<String?>(), base)
         }
     }

@@ -8,7 +8,6 @@
 package net.pearx.okservable.test
 
 import net.pearx.okservable.collection.observableSet
-import net.pearx.okservable.collection.observableSetSimple
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -17,7 +16,7 @@ class ObservableSetSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
         val base = if(empty) mutableSetOf() else mutableSetOf("theevilroot", "root", null, "")
-        var collection = base.observableSetSimple { modified = true }
+        var collection = base.observableSet { modified = true }
     }
 
     @Test

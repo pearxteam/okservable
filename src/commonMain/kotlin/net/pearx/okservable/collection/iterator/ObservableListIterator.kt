@@ -10,32 +10,10 @@
 package net.pearx.okservable.collection.iterator
 
 import net.pearx.okservable.collection.ObservableListHandler
-import net.pearx.okservable.collection.ObservableHandlerSimple
+import net.pearx.okservable.collection.ObservableListEvent
+import net.pearx.okservable.collection.ObservableListScope
+import net.pearx.okservable.collection.send
 import kotlin.math.max
-
-class ObservableMutableListIteratorSimple<T>(private val base: MutableListIterator<T>, private val onUpdate: ObservableHandlerSimple) : MutableListIterator<T> by base {
-    private var lastElement: T? = null
-
-    override fun next(): T = base.next().also { lastElement = it }
-
-    override fun previous(): T = base.previous().also { lastElement = it }
-
-    override fun add(element: T) {
-        base.add(element)
-        onUpdate()
-    }
-
-    override fun remove() {
-        base.remove()
-        onUpdate()
-    }
-
-    override fun set(element: T) {
-        base.set(element)
-        if(lastElement != element)
-            onUpdate()
-    }
-}
 
 class ObservableMutableListIterator<T>(private val base: MutableListIterator<T>, private val onUpdate: ObservableListHandler<T>) : MutableListIterator<T> by base {
     private var lastElement: T? = null
@@ -59,17 +37,17 @@ class ObservableMutableListIterator<T>(private val base: MutableListIterator<T>,
 
     override fun add(element: T) {
         base.add(element)
-        onUpdate.onAdd(max(0, lastElementIndex), element)
+        onUpdate.send(ObservableListEvent.ElementAdded(max(0, lastElementIndex), element))
     }
 
     override fun remove() {
         base.remove()
-        onUpdate.onRemove(lastElementIndex, lastElement as T)
+        onUpdate.send(ObservableListEvent.ElementRemoved(lastElementIndex, lastElement as T))
     }
 
     override fun set(element: T) {
         base.set(element)
         if(lastElement != element)
-            onUpdate.onSet(lastElementIndex, lastElement as T, element)
+            onUpdate.send(ObservableListEvent.ElementSet(lastElementIndex, lastElement as T, element))
     }
 }

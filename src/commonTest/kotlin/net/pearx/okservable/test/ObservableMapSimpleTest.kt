@@ -7,7 +7,7 @@
 
 package net.pearx.okservable.test
 
-import net.pearx.okservable.collection.observableMapSimple
+import net.pearx.okservable.collection.observableMap
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,7 +16,7 @@ class ObservableMapSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
         val base = if(empty) mutableMapOf() else mutableMapOf("theevilroot" to "root", null to "", "" to null, "superuser" to "root")
-        var map = base.observableMapSimple { modified = true }
+        var map = base.observableMap { modified = true }
     }
 
     @Test

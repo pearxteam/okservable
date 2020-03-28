@@ -7,7 +7,7 @@
 
 package net.pearx.okservable.test
 
-import net.pearx.okservable.collection.observableListSimple
+import net.pearx.okservable.collection.observableList
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -16,7 +16,7 @@ class ObservableListSimpleTest {
     inner class TestingContext(empty: Boolean = false) {
         var modified = false
         val base = if(empty) mutableListOf() else mutableListOf("theevilroot", "root", null, "", "root")
-        val collection = base.observableListSimple {
+        val collection = base.observableList {
             modified = true
         }
     }

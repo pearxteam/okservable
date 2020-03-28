@@ -9,15 +9,10 @@
 
 package net.pearx.okservable.collection.iterator
 
+import net.pearx.okservable.collection.ObservableCollectionEvent
 import net.pearx.okservable.collection.ObservableCollectionHandler
-import net.pearx.okservable.collection.ObservableHandlerSimple
+import net.pearx.okservable.collection.ObservableCollectionScope
 
-class ObservableMutableIteratorSimple<T>(private val base: MutableIterator<T>, private val onUpdate: ObservableHandlerSimple) : MutableIterator<T> by base {
-    override fun remove() {
-        base.remove()
-        onUpdate()
-    }
-}
 
 class ObservableMutableIterator<T>(private val base: MutableIterator<T>, private val onUpdate: ObservableCollectionHandler<T>) : MutableIterator<T> by base {
     private var lastElement: T? = null
@@ -26,6 +21,6 @@ class ObservableMutableIterator<T>(private val base: MutableIterator<T>, private
 
     override fun remove() {
         base.remove()
-        onUpdate.onRemove(lastElement as T)
+        onUpdate(ObservableCollectionScope(ObservableCollectionEvent.ElementRemoved(lastElement as T)))
     }
 }
