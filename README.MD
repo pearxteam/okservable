@@ -31,7 +31,7 @@ Multiplatform Kotlin library containing observable data structures, such as Obse
  - Creating a simple observable list:
 ```kotlin
 //             \/ there may be anything extending MutableList
-val items = mutableListOf("pickaxe", "bow").observableListSimple {
+val items = mutableListOf("pickaxe", "bow").observableList {
     println("The list has modified!")
 }
 items += "axe"     // The list has modified!
@@ -41,7 +41,7 @@ items -= "teapot"  // This line won't print the message since the list wasn't mo
  - Creating a simple observable set:
 ```kotlin
 //             \/ there may be anything extending MutableSet
-val items = mutableSetOf("pickaxe", "bow").observableSetSimple {
+val items = mutableSetOf("pickaxe", "bow").observableSet {
     println("The set has modified!")
 }
 items += "axe"     // The set has modified!
@@ -50,7 +50,7 @@ items += "pickaxe" // This line won't print the message since the set wasn't mod
 - Creating a simple observable collection:
 ```kotlin
 //             \/ there may be anything extending MutableCollection
-val items = mutableListOf("pickaxe", "bow").observableCollectionSimple {
+val items = mutableListOf("pickaxe", "bow").observableCollection {
     println("The collection has modified!")
 }
 items += "axe"     // The collection has modified!
@@ -58,7 +58,7 @@ items += "axe"     // The collection has modified!
 - Creating a simple observable map:
 ```kotlin
 //             \/ there may be anything extending MutableMap
-val items = mutableMapOf("pickaxe" to "diamond", "axe" to "iron").observableMapSimple {
+val items = mutableMapOf("pickaxe" to "diamond", "axe" to "iron").observableMap {
     println("The map has modified!")
 }
 items["pickaxe"] = "stone" // The map has modified!
@@ -74,8 +74,11 @@ val items = mutableListOf("pickaxe", "bow").observableList {
     remove { index, element ->
         println("remove[$index]: $element")
     }
-    clear { elements ->
-        println("clear: $elements")
+    preClear { elements ->
+        println("preClear: $elements")
+    }
+    postClear { 
+        println("postClear")
     }
     set { index, prevElement, newElement ->
         println("set[$index]: $prevElement to $newElement")
@@ -87,7 +90,8 @@ items -= "teapot"                 // This line won't print any message since the
 items += setOf("shovel", "sword") // add[2]: shovel
                                   // add[3]: sword
 items[2] = "not_shovel"           // set[2]: shovel to not_shovel
-items.clear()                     // clear: [bow, axe, not_shovel, sword]
+items.clear()                     // preClear: [bow, axe, not_shovel, sword]
+                                  // postClear
 ```
 
  - Creating an observable set:
@@ -100,14 +104,18 @@ val items = mutableSetOf("pickaxe", "bow").observableSet {
     remove { element ->
         println("remove: $element")
     }
-    clear { elements ->
-        println("clear: $elements")
+    preClear { elements ->
+        println("preClear: $elements")
+    }
+    postClear {
+        println("postClear")
     }
 }
 items += "axe"     // add: axe
 items += "pickaxe" // This line won't print any message since the set wasn't modified
 items -= "pickaxe" // remove: pickaxe
-items.clear()      // clear: [bow, axe]
+items.clear()      // preClear: [bow, axe]
+                   // postClear
 ```
 - Creating an observable collection:
 ```kotlin
@@ -119,13 +127,17 @@ val items = mutableListOf("pickaxe", "bow").observableCollection {
     remove { element ->
         println("remove: $element")
     }
-    clear { elements ->
-        println("clear: $elements")
+    preClear { elements ->
+        println("preClear: $elements")
+    }
+    postClear {
+        println("postClear")
     }
 }
 items += "axe"     // add: axe
 items -= "pickaxe" // remove: pickaxe
-items.clear()      // clear: [bow, axe]
+items.clear()      // preClear: [bow, axe]
+                   // postClear
 ```
 - Creation an observable map:
 ```kotlin
@@ -137,12 +149,16 @@ val items = mutableMapOf("pickaxe" to "diamond", "axe" to "iron").observableMap 
     remove { key, value ->
         println("remove[$key]: $value")
     }
-    clear { elements ->
-        println("clear: $elements")
+    preClear { elements ->
+        println("preClear: $elements")
+    }
+    postClear {
+        println("postClear")
     }
 }
 items["pickaxe"] = "stone" // put[pickaxe]: diamond to stone
 items["bow"] = "wooden"    // put[bow]: <null> to wooden
 items.remove("axe")        // remove[axe]: iron
-items.clear()              // clear: {pickaxe=stone, bow=wooden}
+items.clear()              // preClear: {pickaxe=stone, bow=wooden}
+                           // postClear
 ```

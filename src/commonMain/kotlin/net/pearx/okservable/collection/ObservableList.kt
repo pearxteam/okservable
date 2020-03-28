@@ -21,15 +21,16 @@ typealias ObservableListHandler<T> = ObservableListScope<T>.() -> Unit
 internal fun <T> ObservableListHandler<T>.send(event: ObservableListEvent<T>) = this(ObservableListScope(event))
 
 sealed class ObservableListEvent<out T> {
-    class PreClear<out T> : ObservableListEvent<T>()
+    class PreClear<out T>(val elements: List<T>) : ObservableListEvent<T>()
     class PostClear<out T> : ObservableListEvent<T>()
     class ElementAdded<out T>(val index: Int, val element: T) : ObservableListEvent<T>()
     class ElementRemoved<out T>(val index: Int, val element: T) : ObservableListEvent<T>()
     class ElementSet<out T>(val index: Int, val prevElement: T, val newElement: T) : ObservableListEvent<T>()
 }
 
-inline fun <T> ObservableListScope<T>.preClear(block: () -> Unit) {
-    if (event is ObservableListEvent.PreClear) block()
+inline fun <T> ObservableListScope<T>.preClear(block: (elements: List<T>) -> Unit) {
+    val event = event
+    if (event is ObservableListEvent.PreClear) block(event.elements)
 }
 
 inline fun <T> ObservableListScope<T>.postClear(block: () -> Unit) {
@@ -86,7 +87,7 @@ abstract class AbstractObservableList<C : MutableList<E>, E>(protected val base:
 
     override fun clear() {
         if(size > 0) {
-            onUpdate.send(ObservableListEvent.PreClear())
+            onUpdate.send(ObservableListEvent.PreClear(this))
             base.clear()
             onUpdate.send(ObservableListEvent.PostClear())
         }

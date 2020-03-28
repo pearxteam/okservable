@@ -12,21 +12,22 @@ package net.pearx.okservable.collection
 import net.pearx.okservable.internal.removeBulk
 import net.pearx.okservable.internal.removeSingle
 
-inline class ObservableMapScope<out K, out V>(val event: ObservableMapEvent<K, V>)
+inline class ObservableMapScope<K, out V>(val event: ObservableMapEvent<K, V>)
 
 typealias ObservableMapHandler<K, V> = ObservableMapScope<K, V>.() -> Unit
 
 internal fun <K, V> ObservableMapHandler<K, V>.send(event: ObservableMapEvent<K, V>) = this(ObservableMapScope(event))
 
-sealed class ObservableMapEvent<out K, out V> {
-    class PreClear<out K, out V> : ObservableMapEvent<K, V>()
-    class PostClear<out K, out V> : ObservableMapEvent<K, V>()
-    class ElementPut<out K, out V>(val key: K, val prevValue: V?, val newValue: V) : ObservableMapEvent<K, V>()
-    class ElementRemoved<out K, out V>(val key: K, val value: V) : ObservableMapEvent<K, V>()
+sealed class ObservableMapEvent<K, out V> {
+    class PreClear<K, out V>(val elements: Map<K, V>) : ObservableMapEvent<K, V>()
+    class PostClear<K, out V> : ObservableMapEvent<K, V>()
+    class ElementPut<K, out V>(val key: K, val prevValue: V?, val newValue: V) : ObservableMapEvent<K, V>()
+    class ElementRemoved<K, out V>(val key: K, val value: V) : ObservableMapEvent<K, V>()
 }
 
-inline fun <K, V> ObservableMapScope<K, V>.preClear(block: () -> Unit) {
-    if (event is ObservableMapEvent.PreClear) block()
+inline fun <K, V> ObservableMapScope<K, V>.preClear(block: (elements: Map<K, V>) -> Unit) {
+    val event = event
+    if (event is ObservableMapEvent.PreClear) block(event.elements)
 }
 
 inline fun <K, V> ObservableMapScope<K, V>.postClear(block: () -> Unit) {
@@ -185,7 +186,7 @@ open class ObservableMap<C : MutableMap<K, V>, K, V>(protected val base: C, prot
 
     override fun clear() {
         if (size > 0) {
-            onUpdate.send(ObservableMapEvent.PreClear())
+            onUpdate.send(ObservableMapEvent.PreClear(this))
             base.clear()
             onUpdate.send(ObservableMapEvent.PostClear())
         }

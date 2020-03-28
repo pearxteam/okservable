@@ -18,26 +18,27 @@ typealias ObservableCollectionHandler<T> = ObservableCollectionScope<T>.() -> Un
 internal fun <T> ObservableCollectionHandler<T>.send(event: ObservableCollectionEvent<T>) = this(ObservableCollectionScope(event))
 
 sealed class ObservableCollectionEvent<out T> {
-    class PreClear<out T> : ObservableCollectionEvent<T>()
+    class PreClear<out T>(val elements: Collection<T>) : ObservableCollectionEvent<T>()
     class PostClear<out T> : ObservableCollectionEvent<T>()
     class ElementAdded<out T>(val element: T) : ObservableCollectionEvent<T>()
     class ElementRemoved<out T>(val element: T) : ObservableCollectionEvent<T>()
 }
 
-inline fun <T> ObservableCollectionScope<T>.preClear(block: () -> Unit) {
-    if (event is ObservableCollectionEvent.PreClear) block()
+inline fun <T> ObservableCollectionScope<T>.preClear(block: (elements: Collection<T>) -> Unit) {
+    val event = event
+    if (event is ObservableCollectionEvent.PreClear) block(event.elements)
 }
 
 inline fun <T> ObservableCollectionScope<T>.postClear(block: () -> Unit) {
     if (event is ObservableCollectionEvent.PostClear) block()
 }
 
-inline fun <T> ObservableCollectionScope<T>.add(block: (T) -> Unit) {
+inline fun <T> ObservableCollectionScope<T>.add(block: (element: T) -> Unit) {
     val event = event
     if (event is ObservableCollectionEvent.ElementAdded) block(event.element)
 }
 
-inline fun <T> ObservableCollectionScope<T>.remove(block: (T) -> Unit) {
+inline fun <T> ObservableCollectionScope<T>.remove(block: (element: T) -> Unit) {
     val event = event
     if (event is ObservableCollectionEvent.ElementRemoved) block(event.element)
 }
@@ -45,7 +46,7 @@ inline fun <T> ObservableCollectionScope<T>.remove(block: (T) -> Unit) {
 open class ObservableCollection<C : MutableCollection<E>, E>(protected val base: C, protected val onUpdate: ObservableCollectionHandler<E>) : MutableCollection<E> by base {
     override fun clear() {
         if(size > 0) {
-            onUpdate.send(ObservableCollectionEvent.PreClear())
+            onUpdate.send(ObservableCollectionEvent.PreClear(this))
             base.clear()
             onUpdate.send(ObservableCollectionEvent.PostClear())
         }

@@ -41,8 +41,8 @@ class ObservableSetTest {
             remove { element ->
                 _modifications += Modification(Action.REMOVE, element)
             }
-            preClear {
-                _modifications += Modification(Action.CLEAR, HashSet(base))
+            preClear { elements ->
+                _modifications += Modification(Action.CLEAR, HashSet(elements))
             }
         }
     }
