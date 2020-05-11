@@ -32,7 +32,7 @@ jobs:
           ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
           ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_PASSWORD}}
+          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key
           ORG_GRADLE_PROJECT_multigradle.publishHostExclusivesOnly: true
   check_deploy_windows:
@@ -63,7 +63,7 @@ jobs:
           ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
           ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_PASSWORD}}
+          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key
           ORG_GRADLE_PROJECT_multigradle.publishHostExclusivesOnly: true
   check_deploy_linux:
@@ -93,5 +93,5 @@ jobs:
           ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
           ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_PASSWORD}}
+          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
           ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key

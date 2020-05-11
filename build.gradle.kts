@@ -11,6 +11,11 @@ val sonatypeOssPassword: String? by project
 val githubAccessToken: String? by project
 val devBuildNumber: String? by project
 
+val props = listOf("pearxRepoUsername", "pearxRepoPassword", "pearxRepoUsername", "devBuildNumber", "signing.keyId", "signing.password", "signing.secretKeyRingFile", "multigradle.publishHostExclusivesOnly")
+for(prop in props) {
+    println("$prop ${project.hasProperty(prop)}")
+}
+
 plugins {
     id("net.pearx.multigradle.simple.project")
     id("org.jetbrains.kotlin.multiplatform") apply (false)
