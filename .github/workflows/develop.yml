@@ -26,15 +26,7 @@ jobs:
         shell: bash
         env:
           PGP_KEY_PRIVATE: ${{secrets.S_PGP_KEY_PRIVATE}}
-      - run: './gradlew --no-daemon publishDevelop'
-        env:
-          ORG_GRADLE_PROJECT_devBuildNumber: ${{github.run_number}}
-          ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
-          ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key
-          ORG_GRADLE_PROJECT_multigradle.publishHostExclusivesOnly: true
+      - run: './gradlew --no-daemon publishDevelop -PdevBuildNumber=${{ github.run_number }} -PpearxRepoUsername=${{ secrets.S_PEARX_REPO_USERNAME }} -PpearxRepoPassword=${{ secrets.S_PEARX_REPO_PASSWORD }} -Psigning.keyId=${{ secrets.S_PGP_KEY_PUBID }} -Psigning.password="${{ secrets.S_PGP_KEY_PASSWORD }}" -Psigning.secretKeyRingFile=private.key -Pmultigradle.publishHostExclusivesOnly=true'
   check_deploy_windows:
     runs-on: windows-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
@@ -56,16 +48,8 @@ jobs:
         shell: bash
         env:
           PGP_KEY_PRIVATE: ${{secrets.S_PGP_KEY_PRIVATE}}
-      - run: 'CALL gradlew.bat --no-daemon publishDevelop'
+      - run: 'CALL gradlew.bat --no-daemon publishDevelop -PdevBuildNumber=${{ github.run_number }} -PpearxRepoUsername=${{ secrets.S_PEARX_REPO_USERNAME }} -PpearxRepoPassword=${{ secrets.S_PEARX_REPO_PASSWORD }} -Psigning.keyId=${{ secrets.S_PGP_KEY_PUBID }} -Psigning.password="${{ secrets.S_PGP_KEY_PASSWORD }}" -Psigning.secretKeyRingFile=private.key -Pmultigradle.publishHostExclusivesOnly=true'
         shell: cmd
-        env:
-          ORG_GRADLE_PROJECT_devBuildNumber: ${{github.run_number}}
-          ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
-          ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key
-          ORG_GRADLE_PROJECT_multigradle.publishHostExclusivesOnly: true
   check_deploy_linux:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci skip]')"
@@ -87,11 +71,4 @@ jobs:
         shell: bash
         env:
           PGP_KEY_PRIVATE: ${{secrets.S_PGP_KEY_PRIVATE}}
-      - run: './gradlew --no-daemon publishDevelop'
-        env:
-          ORG_GRADLE_PROJECT_devBuildNumber: ${{github.run_number}}
-          ORG_GRADLE_PROJECT_pearxRepoUsername: ${{secrets.S_PEARX_REPO_USERNAME}}
-          ORG_GRADLE_PROJECT_pearxRepoPassword: ${{secrets.S_PEARX_REPO_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.keyId: ${{secrets.S_PGP_KEY_PUBID}}
-          ORG_GRADLE_PROJECT_signing.password: ${{secrets.S_PGP_KEY_PASSWORD}}
-          ORG_GRADLE_PROJECT_signing.secretKeyRingFile: private.key
+      - run: './gradlew --no-daemon publishDevelop -PdevBuildNumber=${{ github.run_number }} -PpearxRepoUsername=${{ secrets.S_PEARX_REPO_USERNAME }} -PpearxRepoPassword=${{ secrets.S_PEARX_REPO_PASSWORD }} -Psigning.keyId=${{ secrets.S_PGP_KEY_PUBID }} -Psigning.password="${{ secrets.S_PGP_KEY_PASSWORD }}" -Psigning.secretKeyRingFile=private.key'
